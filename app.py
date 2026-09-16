@@ -229,122 +229,7 @@ footer {
 st.markdown(GLASS_CSS, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# 3. Minimalist 3D Interactive WebGL Shield (Three.js)
-# -----------------------------------------------------------------------------
-def render_3d_shield(status: str = "IDLE"):
-    """
-    Renders an elegant, floating translucent 3D glass crystal shield with interactive tilt.
-    Colors dynamically respond:
-    - IDLE: Soft Lavender / Electric Indigo
-    - HAM: Emerald Glow
-    - SPAM: Ruby Rose Glow
-    """
-    if status == "SPAM":
-        hex_color = "0xf43f5e"
-        speed = "0.02"
-    elif status == "HAM":
-        hex_color = "0x10b981"
-        speed = "0.008"
-    else:
-        hex_color = "0x818cf8"
-        speed = "0.006"
-
-    html = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <style>
-        body {{ margin: 0; overflow: hidden; background: transparent; }}
-        #c3d {{ width: 100%; height: 160px; display: block; }}
-      </style>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    </head>
-    <body>
-      <canvas id="c3d"></canvas>
-      <script>
-        const canvas = document.getElementById('c3d');
-        const w = window.innerWidth;
-        const h = 160;
-
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(40, w / h, 0.1, 100);
-        camera.position.z = 4.8;
-
-        const renderer = new THREE.WebGLRenderer({{ canvas: canvas, alpha: true, antialias: true }});
-        renderer.setSize(w, h);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-        // Glass Octahedron (Geometric Gem)
-        const geo = new THREE.OctahedronGeometry(1.2, 0);
-        const mat = new THREE.MeshBasicMaterial({{
-          color: {hex_color},
-          wireframe: true,
-          transparent: true,
-          opacity: 0.85
-        }});
-        const mesh = new THREE.Mesh(geo, mat);
-        scene.add(mesh);
-
-        // Core Glowing Nucleus
-        const coreGeo = new THREE.OctahedronGeometry(0.65, 0);
-        const coreMat = new THREE.MeshBasicMaterial({{
-          color: {hex_color},
-          wireframe: false,
-          transparent: true,
-          opacity: 0.25
-        }});
-        const core = new THREE.Mesh(coreGeo, coreMat);
-        scene.add(core);
-
-        // Subtle Outer Ring
-        const ringGeo = new THREE.TorusGeometry(1.7, 0.015, 16, 80);
-        const ringMat = new THREE.MeshBasicMaterial({{
-          color: {hex_color},
-          transparent: true,
-          opacity: 0.35
-        }});
-        const ring = new THREE.Mesh(ringGeo, ringMat);
-        ring.rotation.x = Math.PI / 2.8;
-        scene.add(ring);
-
-        // Interactive mouse tilt
-        let mouseX = 0, mouseY = 0;
-        window.addEventListener('mousemove', (e) => {{
-          const rect = canvas.getBoundingClientRect();
-          mouseX = ((e.clientX - rect.left) / w) * 2 - 1;
-          mouseY = -(((e.clientY - rect.top) / h) * 2 - 1);
-        }});
-
-        function animate() {{
-          requestAnimationFrame(animate);
-          mesh.rotation.y += {speed};
-          mesh.rotation.x += {speed} * 0.5;
-          core.rotation.y -= {speed};
-          ring.rotation.z += 0.004;
-
-          camera.position.x += (mouseX * 0.7 - camera.position.x) * 0.05;
-          camera.position.y += (mouseY * 0.5 - camera.position.y) * 0.05;
-          camera.lookAt(scene.position);
-
-          renderer.render(scene, camera);
-        }}
-        animate();
-
-        window.addEventListener('resize', () => {{
-          const width = window.innerWidth;
-          camera.aspect = width / h;
-          camera.updateProjectionMatrix();
-          renderer.setSize(width, h);
-        }});
-      </script>
-    </body>
-    </html>
-    """
-    components.html(html, height=165)
-
-# -----------------------------------------------------------------------------
-# 4. Pipeline Setup
+# 3. Pipeline Setup
 # -----------------------------------------------------------------------------
 @st.cache_resource(show_spinner=False)
 def load_pipeline():
@@ -472,43 +357,18 @@ tab_single, tab_batch = st.tabs(["✉️ Single Email", "📁 Batch Processing"]
 with tab_single:
     st.markdown('<div class="glass-panel">', unsafe_allow_html=True)
     
-    # Optional quick-fill test samples
-    samples = {
-        "Choose an example (optional)...": "",
-        "🚨 Spam: Urgent Account Suspension": "URGENT: Your account has been suspended due to suspicious activity. Click here immediately to verify your identity: http://verify-security-login.com",
-        "💰 Spam: Crypto Lottery Winner": "Congratulations! You have won 3.5 BTC in the international web sweepstakes. Reply with your bank details to claim your prize.",
-        "✅ Clean: Team Meeting Sync": "Hi team, please find attached the agenda for tomorrow morning's product review meeting at 10:00 AM.",
-        "✅ Clean: Package Delivery Notice": "Hello, your order #58291 has been dispatched and will arrive by tomorrow afternoon. Track your shipment online."
-    }
-    
     # Initialize input state if not present
     if "input_email_text" not in st.session_state:
         st.session_state["input_email_text"] = ""
 
-    def on_sample_change():
-        chosen = st.session_state.get("sample_selector", "")
-        if chosen in samples and chosen != "Choose an example (optional)...":
-            st.session_state["input_email_text"] = samples[chosen]
-        elif chosen == "Choose an example (optional)...":
-            st.session_state["input_email_text"] = ""
-
     def clear_inputs():
         st.session_state["input_email_text"] = ""
-        st.session_state["sample_selector"] = "Choose an example (optional)..."
         st.session_state["last_status"] = "IDLE"
 
-    selected_sample = st.selectbox(
-        "Quick Test Samples", 
-        options=list(samples.keys()),
-        key="sample_selector",
-        on_change=on_sample_change,
-        label_visibility="collapsed"
-    )
-    
     email_text = st.text_area(
         "Email Content",
         key="input_email_text",
-        height=170,
+        height=180,
         placeholder="Paste your email subject & body text here to classify...",
         label_visibility="collapsed"
     )
