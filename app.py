@@ -40,30 +40,6 @@ html, body, [class*="css"] {
     background-attachment: fixed;
 }
 
-/* Universal Glass Container styling */
-div[data-testid="stVerticalBlock"] > div:has(div.glass-panel) {
-    background: transparent;
-}
-
-.glass-panel {
-    background: rgba(255, 255, 255, 0.035);
-    backdrop-filter: blur(24px) saturate(160%);
-    -webkit-backdrop-filter: blur(24px) saturate(160%);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.45),
-                inset 0 1px 0 rgba(255, 255, 255, 0.12);
-    border-radius: 24px;
-    padding: 24px 28px;
-    margin-bottom: 20px;
-    transition: all 0.3s ease;
-}
-
-.glass-panel:hover {
-    border-color: rgba(255, 255, 255, 0.22);
-    box-shadow: 0 20px 48px -6px rgba(0, 0, 0, 0.55),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
-}
-
 /* Glassmorphism Input Areas */
 .stTextArea textarea {
     background: rgba(15, 23, 42, 0.45) !important;
@@ -355,8 +331,6 @@ tab_single, tab_batch = st.tabs(["✉️ Single Email", "📁 Batch Processing"]
 # SINGLE EMAIL CLASSIFICATION
 # =============================================================================
 with tab_single:
-    st.markdown('<div class="glass-panel">', unsafe_allow_html=True)
-    
     # Initialize input state if not present
     if "input_email_text" not in st.session_state:
         st.session_state["input_email_text"] = ""
@@ -449,14 +423,11 @@ with tab_single:
 
             badge_html = f'<div class="token-container">{spam_badges} {symbol_badges} {ham_badges}</div>'
             st.markdown(badge_html, unsafe_allow_html=True)
-    
-    st.markdown('</div>', unsafe_allow_html=True)
 
 # =============================================================================
 # BATCH MBOX & CSV PROCESSING
 # =============================================================================
 with tab_batch:
-    st.markdown('<div class="glass-panel">', unsafe_allow_html=True)
     st.markdown(
         "<p style='color: #cbd5e1; font-size: 0.95rem; margin-bottom: 12px;'>"
         "Upload an <b>.mbox</b> archive or <b>.csv</b> file to classify multiple emails in one batch."
@@ -520,6 +491,5 @@ with tab_batch:
                         )
                 except Exception as err:
                     st.error(f"Failed to process file: {err}")
-                    
-    st.markdown('</div>', unsafe_allow_html=True)
+
 
